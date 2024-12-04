@@ -1,15 +1,16 @@
 //////////////////////////////////////////////////////////////////////
 //
-// Filename: garden_edge_board_holder.scad
+// Filename: garden_edge_board_holder_lib.scad
 //   The garden edge board holder joins multiple boards together at an edge post.
-//   The edge may be anchored to the ground with rebar or a dowel.
+//   The post may be anchored to the ground with rebar or a dowel through a conduit.
+//   The _lib.scad provides the methods needed to create the assemblies.
 // Author:
 //   Jordan Edsall
 // Date:
 //   2024-09-18
 // License:
 //   https://opensource.org/licenses/MIT
-// 
+//
 //////////////////////////////////////////////////////////////////////
 
 // Variables
@@ -52,7 +53,7 @@ geb_tongue_back_depth = 40;
 geb_tongue_start_width = geb_holder_post_backing_width * 0.45;
 geb_tongue_front_width = geb_holder_post_backing_width * 0.2;
 geb_tongue_back_width = geb_holder_post_backing_width * 0.35;
-geb_tongue_start_height = 20;
+geb_tongue_start_height = geb_tongue_start_depth;
 geb_tongue_back_height = geb_holder_height - 2*geb_tongue_start_height;
 geb_tongue_front_height = geb_tongue_back_height * 0.4;
 
@@ -67,6 +68,9 @@ geb_groove_front_height = geb_tongue_back_height;
 geb_groove_back_height = geb_tongue_front_height;
 
 // Post Variables
+geb_post_fill_strategy = "braced"; // Allowed values are 'filled', 'hollow', and 'braced'
+geb_post_fill_brace_thickness = 0.15;
+
 geb_connector_toptube_inner_radius = 12;
 geb_connector_toptube_depth = 15;
 geb_connector_midtube_inner_radius = 8;
@@ -87,47 +91,47 @@ geb_shell_wall_thickness = 1;
 //   Creates a volume where a board can be inserted standing vertically with a backing of equal or greater width.
 //   The [0, 0, 0] point is at the bottom of the volume, with all geometry in the +X region, and the front facing in the +X direction.
 // Arguments:
-//   bh_body_depth         - The depth of the board holder body, including the post backing.
-//   bh_width              - The width of the board holder portion of the board holder body.
-//   bh_height             - The height of the board holder body and post backing (+Z). 
-//   bh_trans_hollow_depth - The depth of the transition section of the hollow the board sits in.
-//   bh_flat_hollow_depth  - The depth of the flat back section of the hollow the board sits in.
-//   bh_hollow_width       - The width of the flat back section of hollow where the board sits.
-//   bh_hollow_height      - The height of the flat back section of hollow where the board sits.
-//   bh_hollow_delta       - The difference in hollow width and height of the front and back.
-//   bh_post_backing_depth - The depth of the body section that butts up against another object.
-//   bh_post_backing_width - The width of the body section that butts up against another object.
+//   bhb_body_depth         - The depth of the board holder body, including the post backing.
+//   bhb_width              - The width of the board holder portion of the board holder body.
+//   bhb_height             - The height of the board holder body and post backing (+Z). 
+//   bhb_trans_hollow_depth - The depth of the transition section of the hollow the board sits in.
+//   bhb_flat_hollow_depth  - The depth of the flat back section of the hollow the board sits in.
+//   bhb_hollow_width       - The width of the flat back section of hollow where the board sits.
+//   bhb_hollow_height      - The height of the flat back section of hollow where the board sits.
+//   bhb_hollow_delta       - The difference in hollow width and height of the front and back.
+//   bhb_post_backing_depth - The depth of the body section that butts up against another object.
+//   bhb_post_backing_width - The width of the body section that butts up against another object.
 module geb_board_holder_body(
-        bh_body_depth = geb_holder_body_depth,
-        bh_width = geb_holder_width,
-        bh_height = geb_holder_height,
-        bh_trans_hollow_depth = geb_holder_transition_board_depth,
-        bh_flat_hollow_depth = geb_holder_flat_board_depth,
-        bh_hollow_width = geb_board_width + geb_board_width_gap,
-        bh_hollow_height = geb_board_height + geb_board_height_gap,
-        bh_hollow_delta = geb_holder_hollow_delta,
-        bh_post_backing_depth = geb_holder_post_backing_depth,
-        bh_post_backing_width = geb_holder_post_backing_width
+        bhb_body_depth = geb_holder_body_depth,
+        bhb_width = geb_holder_width,
+        bhb_height = geb_holder_height,
+        bhb_trans_hollow_depth = geb_holder_transition_board_depth,
+        bhb_flat_hollow_depth = geb_holder_flat_board_depth,
+        bhb_hollow_width = geb_board_width + geb_board_width_gap,
+        bhb_hollow_height = geb_board_height + geb_board_height_gap,
+        bhb_hollow_delta = geb_holder_hollow_delta,
+        bhb_post_backing_depth = geb_holder_post_backing_depth,
+        bhb_post_backing_width = geb_holder_post_backing_width
         ) {
             
-    bh_full_hollow_depth = bh_trans_hollow_depth + bh_flat_hollow_depth;
+    bhb_full_hollow_depth = bhb_trans_hollow_depth + bhb_flat_hollow_depth;
     
     // The board holder volume
-    translate([bh_body_depth/2, 0, bh_height/2]) {
+    translate([bhb_body_depth/2, 0, bhb_height/2]) {
         difference() {
             
             translate([0,0,0]) {
-                cube([bh_body_depth, bh_width, bh_height], center = true);
-                translate([(bh_post_backing_depth - bh_body_depth)/2,0,0])
-                    cube([bh_post_backing_depth, bh_post_backing_width, bh_height], center = true);
+                cube([bhb_body_depth, bhb_width, bhb_height], center = true);
+                translate([(bhb_post_backing_depth - bhb_body_depth)/2,0,0])
+                    cube([bhb_post_backing_depth, bhb_post_backing_width, bhb_height], center = true);
             }
             
-            translate([bh_body_depth/2,0,0]) {
-                cube([bh_full_hollow_depth*2, bh_hollow_width, bh_hollow_height], center = true);
+            translate([bhb_body_depth/2,0,0]) {
+                cube([bhb_full_hollow_depth*2, bhb_hollow_width, bhb_hollow_height], center = true);
 
                 hull() {
-                    cube([bh_trans_hollow_depth*2, bh_hollow_width, bh_hollow_height], center = true);
-                    cube([SMALL_VAL, bh_hollow_width + bh_hollow_delta, bh_hollow_height + bh_hollow_delta], center = true);
+                    cube([bhb_trans_hollow_depth*2, bhb_hollow_width, bhb_hollow_height], center = true);
+                    cube([SMALL_VAL, bhb_hollow_width + bhb_hollow_delta, bhb_hollow_height + bhb_hollow_delta], center = true);
                 }
             }
         }
@@ -203,7 +207,7 @@ module geb_board_holder_tongue_positive(
 //   Creates a tongue which stands vertically, pointing in the -X direction, meant to mate with a groove. The tongue has a flat section at the back and a tapered section at the front.
 //   The [0, 0, 0] point is at the bottom of the volume, with all geometry in the -X region, and the front facing in the -X direction.
 // Arguments:
-//   bht_height               - The height of the board holder body and post backing (+Z).
+//   bht_height              - The height of the board holder body and post backing (+Z).
 //   bht_tongue_start_depth  - The depth at which the flat section stops and the tapered section begins.
 //   bht_tongue_back_depth   - The maximum depth of the outsides of the tapered section.
 //   bht_tongue_front_depth  - The maximum depth of the inside of the tapered section.
@@ -260,7 +264,76 @@ module geb_board_holder_tongue(
     } 
 }
 
-module geb_board_holder() {
+// Module: geb_board_holder_tongue() 
+// Description:
+//   Creates a board holder which stands vertically, with tongue pointing in the -X direction, and the front of the board holder pointing in the +X direction.
+//   The [0, 0, 0] point is at the bottom of the volume, with all geometry for the tongue in the -X region, and the board holder in he +X region.
+// Arguments:
+//   bh_body_depth          - The depth of the board holder body, including the post backing.
+//   bh_width               - The width of the board holder portion of the board holder body.
+//   bh_height              - The height of the board holder body and post backing (+Z). 
+//   bh_trans_hollow_depth  - The depth of the transition section of the hollow the board sits in.
+//   bh_flat_hollow_depth   - The depth of the flat back section of the hollow the board sits in.
+//   bh_hollow_width        - The width of the flat back section of hollow where the board sits.
+//   bh_hollow_height       - The height of the flat back section of hollow where the board sits.
+//   bh_hollow_delta        - The difference in hollow width and height of the front and back.
+//   bh_post_backing_depth  - The depth of the body section that butts up against another object.
+//   bh_post_backing_width  - The width of the body section that butts up against another object.
+//   bh_tongue_start_depth  - The depth at which the flat section stops and the tapered section begins.
+//   bh_tongue_back_depth   - The maximum depth of the outsides of the tapered section.
+//   bh_tongue_front_depth  - The maximum depth of the inside of the tapered section.
+//   bh_tongue_back_width   - The width of the flat section and outside of the tapered section.
+//   bh_tongue_front_width  - The width of the tapered ridge in the middle of the tongue in the Y dimension.
+//   bh_tongue_back_height  - The maximum Z dimension of the tapered section.
+//   bh_tongue_front_height - The Z dimension of the front of the tapered section.
+//   bh_mating_gap          - The extra distance given to mating components to create a snug fit.
+//   bh_dowel_cutout_radius - The radius of the cutout where the mating dowel will be inserted.
+module geb_board_holder(
+        bh_body_depth = geb_holder_body_depth,
+        bh_width = geb_holder_width,
+        bh_height = geb_holder_height,
+        bh_trans_hollow_depth = geb_holder_transition_board_depth,
+        bh_flat_hollow_depth = geb_holder_flat_board_depth,
+        bh_hollow_width = geb_board_width + geb_board_width_gap,
+        bh_hollow_height = geb_board_height + geb_board_height_gap,
+        bh_hollow_delta = geb_holder_hollow_delta,
+        bh_post_backing_depth = geb_holder_post_backing_depth,
+        bh_post_backing_width = geb_holder_post_backing_width,
+        bh_tongue_start_depth = geb_tongue_start_depth,
+        bh_tongue_back_depth = geb_tongue_back_depth,
+        bh_tongue_front_depth = geb_tongue_front_depth,
+        bh_tongue_back_width = geb_tongue_back_width,
+        bh_tongue_front_width = geb_tongue_front_width,
+        bh_tongue_back_height = geb_tongue_back_height,
+        bh_tongue_front_height = geb_tongue_front_height,
+        bh_mating_gap = geb_mating_gap,
+        bh_dowel_cutout_radius = geb_mate_dowel_radius + geb_mate_dowel_gap
+        ) {
+
+    geb_board_holder_body(
+        bhb_body_depth = bh_body_depth,
+        bhb_width = bh_width,
+        bhb_height = bh_height,
+        bhb_trans_hollow_depth = bh_trans_hollow_depth,
+        bhb_flat_hollow_depth = bh_flat_hollow_depth,
+        bhb_hollow_width = bh_hollow_width,
+        bhb_hollow_height = bh_hollow_height,
+        bhb_hollow_delta = bh_hollow_delta,
+        bhb_post_backing_depth = bh_post_backing_depth,
+        bhb_post_backing_width = bh_post_backing_width
+        );
+    geb_board_holder_tongue(
+        bht_height = bh_height,
+        bht_tongue_start_depth = bh_tongue_start_depth,
+        bht_tongue_back_depth = bh_tongue_back_depth,
+        bht_tongue_front_depth = bh_tongue_front_depth,
+        bht_tongue_back_width = bh_tongue_back_width,
+        bht_tongue_front_width = bh_tongue_front_width,
+        bht_tongue_back_height = bh_tongue_back_height,
+        bht_tongue_front_height = bh_tongue_front_height,
+        bht_mating_gap = bh_mating_gap,
+        bht_dowel_cutout_radius = bh_dowel_cutout_radius
+        );
 }
 
 
@@ -343,19 +416,21 @@ module geb_board_holder_post_groove_solid(
 //   Creates the hollowing cutout for a groove recepticle for a board holder tongue.
 //   The [0, 0, 0] point is at the bottom of the volume, with all geometry in the +X region, and the grooved front facing in the +X direction.
 // Arguments:
-//   bhg_body_depth          - The distance from the front of the face the groove is cut into to the back face.
-//   bhg_width               - The width of the full structure.
-//   bhg_height              - The height of the full structure.
-//   bhg_groove_start_depth  - The distance the front face is cut into for the vertical section of the groove.
-//   bhg_groove_front_depth  - The distance to the deepest cut on the outside-Y of the groove.
-//   bhg_groove_back_depth   - The distance to the deepest cut on the Y==0 plane of the groove.
-//   bhg_groove_front_width  - The width of the vertical section of the groove.
-//   bhg_groove_back_width   - The width of the deepest cut face of the groove.
-//   bhg_groove_front_height - The height of the portion in the middle of the groove that is not purely vertical.
-//   bhg_groove_back_height  - The height of the deepest cut face of the groove.
-//   bhg_mating_gap          - The extra distance given to mating components to create a snug fit.
-//   bhg_dowel_cutout_radius - The radius of the cutout where the mating dowel will be inserted.
-//   bhg_wall_thickness      - The thickness of walls to leave in the final solid after subtraction.
+//   bhg_body_depth                - The distance from the front of the face the groove is cut into to the back face.
+//   bhg_width                     - The width of the full structure.
+//   bhg_height                    - The height of the full structure.
+//   bhg_groove_start_depth        - The distance the front face is cut into for the vertical section of the groove.
+//   bhg_groove_front_depth        - The distance to the deepest cut on the outside-Y of the groove.
+//   bhg_groove_back_depth         - The distance to the deepest cut on the Y==0 plane of the groove.
+//   bhg_groove_front_width        - The width of the vertical section of the groove.
+//   bhg_groove_back_width         - The width of the deepest cut face of the groove.
+//   bhg_groove_front_height       - The height of the portion in the middle of the groove that is not purely vertical.
+//   bhg_groove_back_height        - The height of the deepest cut face of the groove.
+//   bhg_mating_gap                - The extra distance given to mating components to create a snug fit.
+//   bhg_dowel_cutout_radius       - The radius of the cutout where the mating dowel will be inserted.
+//   bhg_wall_thickness            - The thickness of walls to leave in the final solid after subtraction.
+//   bhg_post_fill_strategy        - Whether to make the post filled, hollow, or braced internally.
+//   bhg_post_fill_brace_thickness - How thick to make the internally bracing walls.
 module geb_board_holder_post_groove_hollow(
         bhg_body_depth = geb_groove_connector_depth,
         bhg_width = geb_holder_post_backing_width,
@@ -369,7 +444,9 @@ module geb_board_holder_post_groove_hollow(
         bhg_groove_back_height = geb_groove_back_height,
         bhg_mating_gap = geb_mating_gap,
         bhg_dowel_cutout_radius = geb_mate_dowel_radius + geb_mate_dowel_gap,
-        bhg_wall_thickness = geb_holder_wall_thickness
+        bhg_wall_thickness = geb_holder_wall_thickness,
+        bhg_post_fill_strategy = geb_post_fill_strategy,
+        bhg_post_fill_brace_thickness = geb_post_fill_brace_thickness
         ) {
             
     groove_side_width = (bhg_width - bhg_groove_back_width)/2;
@@ -393,15 +470,14 @@ module geb_board_holder_post_groove_hollow(
 
     difference() {
         translate([(bhh_body_depth - bhh_mating_gap)/2, 0, bhh_height/2 + bhg_wall_thickness]) {
-            difference() {
-                cube([bhh_body_depth - bhh_mating_gap, bhh_width, bhh_height], center = true);
-                translate([0, 0, 0]) {
-                    cube([BIG_VAL, 0.3, BIG_VAL], center = true);
-                    cube([0.3, BIG_VAL, BIG_VAL], center = true);
-                }
-            }
+            cube([bhh_body_depth - bhh_mating_gap, bhh_width, bhh_height], center = true);    
         }
         translate([bhg_body_depth, 0, 0]) {
+            if (bhg_post_fill_strategy == "braced") {
+                translate([-bhg_body_depth/2, 0, 0]) {
+                    cube([BIG_VAL, bhg_post_fill_brace_thickness, BIG_VAL], center = true);
+                }
+            }
             translate([0, 0, -bhh_mating_gap]) geb_board_holder_tongue_positive(
                 btp_height = bgh_height,
                 btp_tongue_start_depth = bgh_groove_start_depth + bhh_mating_gap,
@@ -439,19 +515,21 @@ module geb_board_holder_post_groove_hollow(
 //   Creates a groove recepticle for a board holder tongue.
 //   The [0, 0, 0] point is at the bottom of the volume, with all geometry in the +X region, and the grooved front facing in the +X direction.
 // Arguments:
-//   bhg_body_depth          - The distance from the front of the face the groove is cut into to the back face.
-//   bhg_width               - The width of the full structure.
-//   bhg_height              - The height of the full structure.
-//   bhg_groove_start_depth  - The distance the front face is cut into for the vertical section of the groove.
-//   bhg_groove_front_depth  - The distance to the deepest cut on the outside-Y of the groove.
-//   bhg_groove_back_depth   - The distance to the deepest cut on the Y==0 plane of the groove.
-//   bhg_groove_front_width  - The width of the vertical section of the groove.
-//   bhg_groove_back_width   - The width of the deepest cut face of the groove.
-//   bhg_groove_front_height - The height of the portion in the middle of the groove that is not purely vertical.
-//   bhg_groove_back_height  - The height of the deepest cut face of the groove.
-//   bhg_mating_gap          - The extra distance given to mating components to create a snug fit.
-//   bhg_dowel_cutout_radius - The radius of the cutout where the mating dowel will be inserted.
-//   bhg_wall_thickness      - The thickness of walls to leave in the final solid after subtraction.
+//   bhg_body_depth                - The distance from the front of the face the groove is cut into to the back face.
+//   bhg_width                     - The width of the full structure.
+//   bhg_height                    - The height of the full structure.
+//   bhg_groove_start_depth        - The distance the front face is cut into for the vertical section of the groove.
+//   bhg_groove_front_depth        - The distance to the deepest cut on the outside-Y of the groove.
+//   bhg_groove_back_depth         - The distance to the deepest cut on the Y==0 plane of the groove.
+//   bhg_groove_front_width        - The width of the vertical section of the groove.
+//   bhg_groove_back_width         - The width of the deepest cut face of the groove.
+//   bhg_groove_front_height       - The height of the portion in the middle of the groove that is not purely vertical.
+//   bhg_groove_back_height        - The height of the deepest cut face of the groove.
+//   bhg_mating_gap                - The extra distance given to mating components to create a snug fit.
+//   bhg_dowel_cutout_radius       - The radius of the cutout where the mating dowel will be inserted.
+//   bhg_wall_thickness            - The thickness of walls to leave in the final solid after subtraction.
+//   bhg_post_fill_strategy        - Whether to make the post filled, hollow, or braced internally.
+//   bhg_post_fill_brace_thickness - How thick to make the internally bracing walls.
 module geb_board_holder_post_groove(
         bhg_body_depth = geb_groove_connector_depth,
         bhg_width = geb_holder_post_backing_width,
@@ -465,7 +543,9 @@ module geb_board_holder_post_groove(
         bhg_groove_back_height = geb_groove_back_height,
         bhg_mating_gap = geb_mating_gap,
         bhg_dowel_cutout_radius = geb_mate_dowel_radius + geb_mate_dowel_gap,
-        bhg_wall_thickness = geb_holder_wall_thickness
+        bhg_wall_thickness = geb_holder_wall_thickness,
+        bhg_post_fill_strategy = geb_post_fill_strategy,
+        bhg_post_fill_brace_thickness = geb_post_fill_brace_thickness
         ) {
 
     difference() {
@@ -483,7 +563,7 @@ module geb_board_holder_post_groove(
             bhg_mating_gap = bhg_mating_gap,
             bhg_dowel_cutout_radius = bhg_dowel_cutout_radius
             );
-        geb_board_holder_post_groove_hollow(
+        if (bhg_post_fill_strategy != "filled") geb_board_holder_post_groove_hollow(
             bhg_body_depth = bhg_body_depth,
             bhg_width = bhg_width,
             bhg_height = bhg_height,
@@ -496,7 +576,9 @@ module geb_board_holder_post_groove(
             bhg_groove_back_height = bhg_groove_back_height,
             bhg_mating_gap = bhg_mating_gap,
             bhg_dowel_cutout_radius = bhg_dowel_cutout_radius,
-            bhg_wall_thickness = bhg_wall_thickness
+            bhg_wall_thickness = bhg_wall_thickness,
+            bhg_post_fill_strategy = bhg_post_fill_strategy,
+            bhg_post_fill_brace_thickness = bhg_post_fill_brace_thickness
             );
     }
 }
@@ -528,29 +610,33 @@ module geb_board_holder_post_groove_subtract(
 //   The stake connector may be embedded in the center of the post.
 //   The [0, 0, 0] point is at the bottom of the volume, in the middle of the bottom face.
 // Arguments:
-//   bpc_core_depth     - The dimension of the core in the X dimension. Usually the same as the width.
-//   bpc_core_width     - The dimension of the core in the Y dimension.
-//   bpc_core_height    - The height of the structure.
-//   bpc_wall_thickness - The wall thickness of the structure.
+//   bpc_core_depth                - The dimension of the core in the X dimension. Usually the same as the width.
+//   bpc_core_width                - The dimension of the core in the Y dimension.
+//   bpc_core_height               - The height of the structure.
+//   bpc_wall_thickness            - The wall thickness of the structure.
+//   bpc_post_fill_strategy        - Whether to make the post filled, hollow, or braced internally.
+//   bpc_post_fill_brace_thickness - How thick to make the internally bracing walls.
 module geb_board_holder_simple_post_core(
         bpc_core_depth = geb_holder_post_backing_width,
         bpc_core_width = geb_holder_post_backing_width,
         bpc_core_height = geb_holder_height,
-        bpc_wall_thickness = geb_holder_wall_thickness
+        bpc_wall_thickness = geb_holder_wall_thickness,
+        bpc_post_fill_strategy = geb_post_fill_strategy,
+        bpc_post_fill_brace_thickness = geb_post_fill_brace_thickness
         ) {
 
     difference() {
         translate([0, 0, bpc_core_height/2]) {
             cube([bpc_core_depth, bpc_core_width, bpc_core_height], center = true);
         }
-        translate([0, 0, bpc_core_height/2]) {
+        if (bpc_post_fill_strategy != "filled") translate([0, 0, bpc_core_height/2]) {
             difference() {
                 cube([bpc_core_depth - bpc_wall_thickness * 2,
                     bpc_core_width - bpc_wall_thickness * 2,
                     bpc_core_height - bpc_wall_thickness * 2], center = true);
-                translate([0, 0, 0]) {
-                    cube([BIG_VAL, 0.3, BIG_VAL], center = true);
-                    cube([0.3, BIG_VAL, BIG_VAL], center = true);
+                if (bpc_post_fill_strategy == "braced") translate([0, 0, 0]) {
+                    cube([BIG_VAL, bpc_post_fill_brace_thickness, BIG_VAL], center = true);
+                    cube([bpc_post_fill_brace_thickness, BIG_VAL, BIG_VAL], center = true);
                 }
             }
         }
@@ -676,7 +762,7 @@ module geb_board_holder_simple_post_connector(
 //   The [0, 0, 0] point is at the bottom of the volume, with the posts present extending an equal distance away.
 // Arguments:
 //   bsp_groove_connector_depth - The distance from the front of the face the groove is cut into to the back of the connector.
-//   bsp_connector_offset       - The distance away from [0, 0, 0] where the connector's back sits.
+//   bsp_connector_offset       - The distance away from [0, 0, 0] at which the connector's back sits.
 //   bsp_width                  - The width of the full structure.
 //   bsp_height                 - The height of the full structure.
 //   bsp_groove_start_depth     - The distance the front face is cut into for the vertical section of the groove.
@@ -696,6 +782,7 @@ module geb_board_holder_simple_post_connector(
 //   bsp_wall_thickness         - The wall thickness of the structure.
 module geb_board_holder_simple_post(
         bsp_groove_connector_depth = geb_groove_connector_depth,
+        bsp_connector_offset = geb_connector_offset,
         bsp_width = geb_holder_post_backing_width,
         bsp_height = geb_holder_height,
         bsp_groove_start_depth = geb_groove_start_depth,
@@ -707,10 +794,7 @@ module geb_board_holder_simple_post(
         bsp_groove_back_height = geb_groove_back_height,
         bsp_mating_gap = geb_mating_gap,
         bsp_dowel_cutout_radius = geb_mate_dowel_radius + geb_mate_dowel_gap,
-
-        bsp_connector_offset = geb_connector_offset,
         bsp_post_angles = [0, 90],
-
         bsp_toptube_inner_radius = geb_connector_toptube_inner_radius,
         bsp_toptube_depth = geb_connector_toptube_depth,
         bsp_midtube_inner_radius = geb_connector_midtube_inner_radius,
@@ -778,23 +862,27 @@ module geb_board_holder_simple_post(
 
 // Module: geb_board_holder_post_shell() 
 // Description:
-//   Creates the shell of a full post assembly with tongues and grooves connected.
+//   Creates the shell of a full post assembly where tongues and grooves are connected.
 //   The [0, 0, 0] point is at the bottom of the middle of the post core volume, with arm shells for each of the bps_post_angles.
 // Arguments:
-//   bps_body_depth          - The distance from the front of the face the groove is cut into to the back face.
-//   bps_post_angles - The radius of the cutout where the mating dowel will be inserted.
+//   bps_width             - The distance from the front of the face the groove is cut into to the back face.
+//   bps_height            - The radius of the cutout where the mating dowel will be inserted.
+//   bps_connector_offset  - The distance away from [0, 0, 0] at which the connector's back sits.
+//   bh_width              - The width of the board holder portion of the board holder body.
+//   bh_height             - The height of the board holder body and post backing (+Z). 
+//   bh_post_backing_depth - The depth of the body section that butts up against another object.
+//   bps_mating_gap        - The extra distance given to mating components to create a snug fit.
+//   bps_groove_body_depth - The distance from the front of the face the groove is cut into to the back face.
+//   bps_post_angles       - The angles at which the posts lie.
+//   bps_shell_thickness   - The thickness of this shell.
 module geb_board_holder_post_shell(
         bps_width = geb_holder_post_backing_width,
         bps_height = geb_holder_height,
         bps_connector_offset = geb_connector_offset,
-
-        
         bh_width = geb_holder_width,
         bh_height = geb_holder_height,
         bh_post_backing_depth = geb_holder_post_backing_depth,
-
         bps_mating_gap = geb_mating_gap,
-
         bps_groove_body_depth = geb_groove_connector_depth,
         bps_post_angles = [0, 90],
         bps_shell_thickness = geb_shell_wall_thickness
@@ -840,22 +928,3 @@ module geb_board_holder_post_shell(
         }
     }
 }
-
-
-/*
-geb_board_holder_post_groove();
-//*/
-
-
-/*
-//translate([120, 0, 0]) {
-    geb_board_holder_body();
-    geb_board_holder_tongue();
-//}
-//*/
-
-
-//geb_board_holder_simple_post();
-
-
-//rotate([180, 0, 0]) geb_board_holder_post_shell();
